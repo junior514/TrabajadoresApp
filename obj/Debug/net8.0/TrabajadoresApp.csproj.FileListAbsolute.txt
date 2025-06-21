@@ -285,3 +285,4 @@ C:\Diana\TrabajadoresApp\TrabajadoresApp\obj\Debug\net8.0\refint\TrabajadoresApp
 C:\Diana\TrabajadoresApp\TrabajadoresApp\obj\Debug\net8.0\TrabajadoresApp.pdb
 C:\Diana\TrabajadoresApp\TrabajadoresApp\obj\Debug\net8.0\TrabajadoresApp.genruntimeconfig.cache
 C:\Diana\TrabajadoresApp\TrabajadoresApp\obj\Debug\net8.0\ref\TrabajadoresApp.dll
+C:\Diana\TrabajadoresApp\TrabajadoresApp\obj\Debug\net8.0\TrabajadoresApp.sourcelink.json

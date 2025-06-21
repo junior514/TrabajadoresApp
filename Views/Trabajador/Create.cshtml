@@ -1,0 +1,295 @@
+﻿@model TrabajadoresApp.Models.Trabajador
+@{
+    ViewData["Title"] = "Creación Trabajador";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Registro de Trabajador</h4>
+                </div>
+                <div class="card-body">
+                    
+
+                    <!-- Mostrar mensajes de éxito o error -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Create" id="trabajadorForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="TipoDocumento" class="form-label">Tipo Documento</label>
+                            <select asp-for="TipoDocumento" class="form-select" asp-items="ViewBag.TipoDocumento" id="TipoDocumento">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                            <span asp-validation-for="TipoDocumento" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NumeroDocumento" class="form-label">Numero Documento</label>
+                            <div class="input-group">
+                                <input asp-for="NumeroDocumento" class="form-control" placeholder="Ej: 12345678" id="NumeroDocumento" />
+                                <div class="input-group-text" id="documentoValidationIcon">
+                                    <i class="fas fa-question text-muted"></i>
+                                </div>
+                            </div>
+                            <span asp-validation-for="NumeroDocumento" class="text-danger" id="numeroDocumentoError"></span>
+                            <div class="form-text" id="documentoHelp">
+                                <small class="text-muted">Seleccione primero el tipo de documento</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Nombres" class="form-label">Nombres</label>
+                            <input asp-for="Nombres" class="form-control" placeholder="Ej: Fernando Antonio Salazar Romero" id="Nombres" />
+                            <span asp-validation-for="Nombres" class="text-danger"></span>
+                            <div class="form-text">
+                                <small class="text-muted">Solo letras y espacios, mínimo 2 caracteres</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Sexo" class="form-label">Sexo</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="Sexo" value="M" id="sexoMasculino">
+                                    <label class="form-check-label" for="sexoMasculino">
+                                        Masculino
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="Sexo" value="F" id="sexoFemenino">
+                                    <label class="form-check-label" for="sexoFemenino">
+                                        Femenino
+                                    </label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Sexo" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="IdDepartamento" class="form-label">Departamento</label>
+                            <select asp-for="IdDepartamento" class="form-select" asp-items="ViewBag.IdDepartamento" id="IdDepartamento">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                            <span asp-validation-for="IdDepartamento" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="IdProvincia" class="form-label">Provincia</label>
+                            <select asp-for="IdProvincia" class="form-select" asp-items="ViewBag.IdProvincia" id="IdProvincia">
+                                <option value="">-- Seleccione Departamento Primero --</option>
+                            </select>
+                            <span asp-validation-for="IdProvincia" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="IdDistrito" class="form-label">Distrito</label>
+                            <select asp-for="IdDistrito" class="form-select" asp-items="ViewBag.IdDistrito" id="IdDistrito">
+                                <option value="">-- Seleccione Provincia Primero --</option>
+                            </select>
+                            <span asp-validation-for="IdDistrito" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a la Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let validacionTimeout;
+
+            // Función para actualizar la ayuda del documento según el tipo
+            function updateDocumentHelp(tipoDocumento) {
+                const helpText = {
+                    'DNI': 'DNI debe tener exactamente 8 dígitos',
+                    'Carnet Extranjeria': 'Carnet de Extranjería debe tener 9 caracteres alfanuméricos',
+                    'Pasaporte': 'Pasaporte debe tener entre 6 y 12 caracteres alfanuméricos'
+                };
+
+                const helpElement = $('#documentoHelp small');
+                if (tipoDocumento && helpText[tipoDocumento]) {
+                    helpElement.text(helpText[tipoDocumento]).removeClass('text-muted').addClass('text-info');
+                } else {
+                    helpElement.text('Seleccione primero el tipo de documento').removeClass('text-info').addClass('text-muted');
+                }
+            }
+
+            // Función para validar documento en tiempo real
+            function validateDocument() {
+                const tipoDocumento = $('#TipoDocumento').val();
+                const numeroDocumento = $('#NumeroDocumento').val();
+                const icon = $('#documentoValidationIcon i');
+                const errorSpan = $('#numeroDocumentoError');
+
+                if (!tipoDocumento || !numeroDocumento) {
+                    icon.removeClass().addClass('fas fa-question text-muted');
+                    errorSpan.text('');
+                    return;
+                }
+
+                // Mostrar estado de carga
+                icon.removeClass().addClass('fas fa-spinner fa-spin text-info');
+
+                clearTimeout(validacionTimeout);
+                validacionTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: '@Url.Action("ValidarNumeroDocumento", "Trabajador")',
+                        type: 'GET',
+                        data: {
+                            numeroDocumento: numeroDocumento,
+                            tipoDocumento: tipoDocumento
+                        },
+                        success: function(result) {
+                            if (result.esValido) {
+                                icon.removeClass().addClass('fas fa-check text-success');
+                                errorSpan.text('');
+                            } else {
+                                icon.removeClass().addClass('fas fa-times text-danger');
+                                errorSpan.text(result.mensaje);
+                            }
+                        },
+                        error: function() {
+                            icon.removeClass().addClass('fas fa-exclamation-triangle text-warning');
+                            errorSpan.text('Error al validar el documento');
+                        }
+                    });
+                }, 500);
+            }
+
+            // Validar nombres en tiempo real
+            function validateNames() {
+                const nombres = $('#Nombres').val();
+                const hasNumbers = /\d/.test(nombres);
+                const isTooShort = nombres.trim().length < 2 && nombres.length > 0;
+
+                let errorMsg = '';
+                if (hasNumbers) {
+                    errorMsg = 'Los nombres no pueden contener números';
+                } else if (isTooShort) {
+                    errorMsg = 'Los nombres deben tener al menos 2 caracteres';
+                }
+
+                const errorSpan = $('#Nombres').siblings('.text-danger');
+                errorSpan.text(errorMsg);
+            }
+
+            // Event listeners
+            $('#TipoDocumento').change(function() {
+                updateDocumentHelp($(this).val());
+                $('#NumeroDocumento').val(''); // Limpiar el campo al cambiar tipo
+                validateDocument();
+            });
+
+            $('#NumeroDocumento').on('input', validateDocument);
+            $('#Nombres').on('input', validateNames);
+
+            // Cargar provincias cuando se selecciona un departamento
+            $('#IdDepartamento').change(function() {
+                var departamentoId = $(this).val();
+                var provinciaSelect = $('#IdProvincia');
+                var distritoSelect = $('#IdDistrito');
+
+                // Limpiar y deshabilitar selects dependientes
+                provinciaSelect.empty().append('<option value="">-- Cargando... --</option>');
+                distritoSelect.empty().append('<option value="">-- Seleccione Provincia Primero --</option>').prop('disabled', true);
+
+                if (departamentoId) {
+                    $.ajax({
+                        url: '@Url.Action("GetProvinciasByDepartamento", "Trabajador")',
+                        type: 'GET',
+                        data: { departamentoId: departamentoId },
+                        success: function(data) {
+                            provinciaSelect.empty().append('<option value="">-- Seleccione --</option>');
+                            $.each(data, function(i, provincia) {
+                                provinciaSelect.append('<option value="' + provincia.id + '">' + provincia.nombre + '</option>');
+                            });
+                            provinciaSelect.prop('disabled', false);
+                        },
+                        error: function() {
+                            provinciaSelect.empty().append('<option value="">-- Error al cargar --</option>');
+                        }
+                    });
+                } else {
+                    provinciaSelect.prop('disabled', true);
+                }
+            });
+
+            // Cargar distritos cuando se selecciona una provincia
+            $('#IdProvincia').change(function() {
+                var provinciaId = $(this).val();
+                var distritoSelect = $('#IdDistrito');
+
+                distritoSelect.empty().append('<option value="">-- Cargando... --</option>');
+
+                if (provinciaId) {
+                    $.ajax({
+                        url: '@Url.Action("GetDistritosByProvincia", "Trabajador")',
+                        type: 'GET',
+                        data: { provinciaId: provinciaId },
+                        success: function(data) {
+                            distritoSelect.empty().append('<option value="">-- Seleccione --</option>');
+                            $.each(data, function(i, distrito) {
+                                distritoSelect.append('<option value="' + distrito.id + '">' + distrito.nombre + '</option>');
+                            });
+                            distritoSelect.prop('disabled', false);
+                        },
+                        error: function() {
+                            distritoSelect.empty().append('<option value="">-- Error al cargar --</option>');
+                        }
+                    });
+                } else {
+                    distritoSelect.empty().append('<option value="">-- Seleccione Provincia Primero --</option>').prop('disabled', true);
+                }
+            });
+
+            // Mejorar la experiencia del formulario
+            $('#trabajadorForm').on('submit', function() {
+                $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...');
+            });
+
+            // Inicializar selects como deshabilitados
+            $('#IdProvincia').prop('disabled', true);
+            $('#IdDistrito').prop('disabled', true);
+
+            // Inicializar ayuda del documento
+            updateDocumentHelp($('#TipoDocumento').val());
+        });
+    </script>
+}

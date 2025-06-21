@@ -1,0 +1,200 @@
+﻿@model IEnumerable<TrabajadoresApp.Models.Trabajador>
+@{
+    ViewData["Title"] = "Listado de Trabajadores";
+}
+
+<style>
+    .fila-masculino {
+        background-color: #e3f2fd !important; /* Azul claro */
+    }
+
+    .fila-femenino {
+        background-color: #fff3e0 !important; /* Naranja claro */
+    }
+
+    .fila-masculino:hover {
+        background-color: #bbdefb !important; /* Azul más oscuro al hover */
+    }
+
+    .fila-femenino:hover {
+        background-color: #ffe0b2 !important; /* Naranja más oscuro al hover */
+    }
+
+    .badge-masculino {
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .badge-femenino {
+        background-color: #ff9800;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Listado de Trabajadores</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Filtro por Sexo -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <form asp-action="Index" method="get">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-filter"></i>
+                                    </span>
+                                    <select name="filtroSexo" class="form-select" asp-items="ViewBag.FiltroSexo" onchange="this.form.submit()">
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9 text-end">
+                            <a asp-action="Create" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Nuevo Registro
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Leyenda de colores -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-3 align-items-center">
+                                <span class="fw-bold">Leyenda:</span>
+                                <span class="badge badge-masculino px-3 py-2">
+                                    <i class="fas fa-male"></i> Masculino
+                                </span>
+                                <span class="badge badge-femenino px-3 py-2">
+                                    <i class="fas fa-female"></i> Femenino
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contador de registros -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Total de registros encontrados: @Model.Count()</strong>
+                                @if (!string.IsNullOrEmpty(ViewBag.FiltroSexo?.ToString()))
+                                {
+                                    <span class="ms-2">
+                                        - Filtrado por: @(ViewBag.FiltroSexo.ToString() == "M" ? "Masculino" : "Femenino")
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Tipo Documento</th>
+                                    <th>Nro Documento</th>
+                                    <th>Nombres</th>
+                                    <th>Sexo</th>
+                                    <th>Departamento</th>
+                                    <th>Provincia</th>
+                                    <th>Distrito</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="@(item.Sexo == "M" ? "fila-masculino" : "fila-femenino")">
+                                            <td>@Html.DisplayFor(modelItem => item.TipoDocumento)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.NumeroDocumento)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Nombres)</td>
+                                            <td>
+                                                @if (item.Sexo == "M")
+                                                {
+                                                    <span class="badge badge-masculino">
+                                                        <i class="fas fa-male"></i> Masculino
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-femenino">
+                                                        <i class="fas fa-female"></i> Femenino
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>@Html.DisplayFor(modelItem => item.Departamento.NombreDepartamento)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Provincia.NombreProvincia)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Distrito.NombreDistrito)</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Edit" asp-route-id="@item.Id"
+                                                       class="btn btn-warning btn-sm"
+                                                       title="Editar">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </a>
+                                                    
+                                                    <a asp-action="Delete" asp-route-id="@item.Id"
+                                                       class="btn btn-danger btn-sm"
+                                                       title="Eliminar"
+                                                       onclick="return confirm('¿Está seguro de eliminar este registro?')">
+                                                        <i class="fas fa-trash"></i> Eliminar
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="fas fa-search fa-2x mb-2"></i>
+                                            <br>
+                                            No se encontraron trabajadores
+                                            @if (!string.IsNullOrEmpty(ViewBag.FiltroSexo?.ToString()))
+                                            {
+                                                <span>con el filtro aplicado</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estadísticas por sexo -->
+                    @if (Model.Any())
+                    {
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">
+                                            <i class="fas fa-male"></i> Masculino
+                                        </h5>
+                                        <h2 class="card-text text-primary">@Model.Count(t => t.Sexo == "M")</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-warning">
+                                            <i class="fas fa-female"></i> Femenino
+                                        </h5>
+                                        <h2 class="card-text text-warning">@Model.Count(t => t.Sexo == "F")</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
